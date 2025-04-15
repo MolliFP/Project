@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Задачи и Календарь</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            background-color: #f0f4f8;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .navbar {
+            background-color: #673AB7;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .navbar-brand,
+        .nav-link {
+            color: white !important;
+            font-weight: bold;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between; /* Это гарантирует, что колонки не будут смешиваться */
+        }
+
+        .sidebar {
+            width: 250px;
+            margin-right: 20px;
+        }
+
+        .task-container {
+            flex: 1;
+        }
+
+        .task-column {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            flex: 1; /* Занимает равную ширину */
+            min-width: 250px; /* Минимальная ширина колонки */
+            max-width: 33%; /* Максимальная ширина колонки */
+            overflow-y: auto; /* Прокрутка для задач, если они превышают высоту колонки */
+            transition: transform 0.2s;
+        }
+
+        .task-column:hover {
+            transform: translateY(-5px);
+        }
+
+        .column-header {
+            font-weight: bold;
+            text-align: center;
+            font-size: 1.5em;
+            color: #673AB7;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #673AB7;
+            padding-bottom: 10px;
+        }
+
+        .task {
+            background-color: #E8EAF6;
+            color: #3F51B5;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+
+        .task:hover {
+            background-color: #D3DCE6;
+        }
+
+        .btn {
+            border-radius: 20px;
+        }
+
+        .btn-primary {
+            background-color: #673AB7;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #5E35B1;
+        }
+
+        .modal-header {
+            background-color: #673AB7;
+            color: white;
+        }
+
+        .alert {
+            border-radius: 5px;
+        }
+
+        .task-column {
+            margin-right: 20px;
+        }
+
+        .task-column:last-child {
+            margin-right: 0;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <a class="navbar-brand" href="/">Система Задач</a>
+    <div class="collapse navbar-collapse">
+        <ul class="navbar-nav">
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('tasks_calendar') }}">Мои задачи</a></li>
+            {% if 'user_id' in session %}
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Выход</a></li>
+            {% else %}
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Вход</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('register') }}">Регистрация</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('all_tasks') }}">Все задачи</a></li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>
+
+<div class="container mt-5">
+    <div class="sidebar">
+        <h4>Фильтрация и сортировка</h4>
+        <form method="GET" action="{{ url_for('tasks_calendar') }}" class="mb-4">
+            <input type="text" name="search" placeholder="Поиск задач..." class="form-control mb-2">
+            <select name="status_filter" class="form-control mb-2">
+                <option value="">Все статусы</option>
+                <option value="waiting">В ожидании</option>
+                <option value="inProgress">В процессе</option>
+                <option value="completed">Завершенные</option>
+            </select>
+            <button type="submit" class="btn btn-primary">Фильтровать</button>
+        </form>
+
+        <form method="GET" action="{{ url_for('tasks_calendar') }}" class="mb-4">
+            <select name="sort" class="form-control mb-2">
+                <option value="">Сортировать по</option>
+                <option value="due_date">Срок исполнения</option>
+                <option value="priority">Приоритет</option>
+            </select>
+            <button type="submit" class="btn btn-primary">Сортировать</button>
+        </form>
+    </div>
+
+    <div class="task-column" id="waitingTasks" ondrop="drop(event, 'waiting')" ondragover="allowDrop(event)">
+        <div class="column-header">Waiting</div>
+        <button class="btn btn-outline-primary mb-3" onclick="openTaskModal('waiting')">
+            <i class="fas fa-plus-circle"></i>
+        </button>
+        <ul class="list-group mb-3">
+            {% for task in tasks_waiting %}
+                <li class="task" draggable="true" data-task-id="{{ task['id'] }}" ondragstart="drag(event)"
+                    onclick="showTaskDetails('{{ task['title'] }}', '{{ task['description'] }}', '{{ task['end_time'] }}', '{{ task['priority'] }}', {{ task['id'] }}, '{{ task['time_spent'] }}')">
+                    <div>
+                        <span>{{ task['title'] }} - Приоритет: {{ task['priority'] }}</span>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="task-column" id="inProgressTasks" ondrop="drop(event, 'inProgress')" ondragover="allowDrop(event)">
+        <div class="column-header">In Progress</div>
+        <ul class="list-group mb-3">
+            {% for task in tasks_in_progress %}
+                <li class="task" draggable="true" data-task-id="{{ task['id'] }}" ondragstart="drag(event)"
+                    onclick="showTaskDetails('{{ task['title'] }}', '{{ task['description'] }}', '{{ task['end_time'] }}', '{{ task['priority'] }}', {{ task['id'] }}, '{{ task['time_spent'] }}')">
+                    <div>
+                        <span>{{ task['title'] }} - Приоритет: {{ task['priority'] }}</span>
+                        <div>
+                            <span id="timer-{{ task['id'] }}">0:00</span>
+                            <button class="btn btn-sm btn-success" onclick="startTimer(event, {{ task['id'] }})">Запустить</button>
+                            <button class="btn btn-sm btn-danger" onclick="stopTimer(event, {{ task['id'] }})">Остановить</button>
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="task-column" id="completedTasks" ondrop="drop(event, 'completed')" ondragover="allowDrop(event)">
+        <div class="column-header">Completed</div>
+        <ul class="list-group mb-3">
+            {% for task in tasks_completed %}
+                <li class="task" draggable="true" data-task-id="{{ task['id'] }}" ondragstart="drag(event)"
+                    onclick="showTaskDetails('{{ task['title'] }}', '{{ task['description'] }}', '{{ task['end_time'] }}', '{{ task['priority'] }}', {{ task['id'] }}, '{{ task['time_spent'] }}')">
+                    <div>
+                        <span>{{ task['title'] }} - Приоритет: {{ task['priority'] }}</span>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+    <!-- Уведомления -->
+    <div class="alert alert-success notification" id="taskNotification" role="alert" style="display:none;">
+        Задача успешно добавлена!
+    </div>
+    <div class="alert alert-danger notification" id="errorNotification" role="alert" style="display:none;">
+        Произошла ошибка, попробуйте еще раз.
+    </div>
+
+    <!-- Модальное окно для добавления задачи -->
+<div class="modal fade" id="taskModal" tabindex="-1" aria-labelledby="taskModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="addTaskForm" method="post" action="{{ url_for('add_task') }}">
+                <input type="hidden" name="status" id="addTaskStatus">
+                <div class="modal-header">
+                    <h5 class="modal-title">Добавить новую задачу</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="task_title">Название задачи</label>
+                        <input type="text" name="task_title" class="form-control" id="task_title" required>
+                    </div>
+
+<div class="form-group">
+    <label for="task_description">Описание задачи</label>
+    <textarea name="task_description" class="form-control" id="task_description" rows="3"></textarea>
+</div>
+
+                    <div class="form-group">
+                        <label for="completion_date">Дата завершения</label>
+                        <input type="datetime-local" name="completion_date" class="form-control" id="completion_date" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="priority">Приоритет</label>
+                        <select id="priority" name="priority" class="form-control">
+                            <option value="low">Низкий</option>
+                            <option value="medium" selected>Средний</option>
+                            <option value="high">Высокий</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="submit" class="btn btn-primary">Добавить задачу</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+    <!-- Модальное окно для редактирования задачи -->
+<div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{{ url_for('edit_task') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editTaskModalLabel">Редактировать задачу</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="task_id" id="editTaskId">
+                    <input type="hidden" name="action" value="edit">
+                    <div class="form-group">
+                        <label for="edit_task_title">Название задачи</label>
+                        <input type="text" name="task_title" class="form-control" id="edit_task_title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_task_description">Описание задачи</label>
+                        <textarea name="task_description" class="form-control" id="edit_task_description" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_completion_date">Дата завершения</label>
+                        <input type="datetime-local" name="completion_date" class="form-control" id="edit_completion_date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_priority">Приоритет</label>
+                        <select id="edit_priority" name="priority" class="form-control">
+                            <option value="low">Низкий</option>
+                            <option value="medium">Средний</option>
+                            <option value="high">Высокий</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для просмотра деталей задачи -->
+<div class="modal fade" id="taskDetailsModal" tabindex="-1" aria-labelledby="taskDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="taskDetailsModalLabel">Детали задачи</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h5 id="taskDetailTitle"></h5>
+                <p><strong>Описание:</strong> <span id="taskDetailDescription">Нет описания.</span></p>
+                <p><strong>Дата создания:</strong> <span id="taskDetailTimeSpent">Не указано</span></p>
+                <p><strong>Дата завершения:</strong> <span id="taskDetailEndtime">Не указано</span></p>
+                <p><strong>Приоритет:</strong> <span id="taskDetailPriority">Низкий</span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                <button type="button" class="btn btn-primary" id="editTaskButton" onclick="openEditTaskModal()">Редактировать</button>
+                <button type="button" class="btn btn-danger" id="deleteTaskButton">Удалить задачу</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+function formatTime(totalSeconds) {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`; // Форматирование: MM:SS
+}
+
+function openTaskModal(status) {
+    document.getElementById('addTaskStatus').value = status;
+    $('#taskModal').modal('show');
+}
+
+function openEditTaskModal(taskId, taskTitle, taskDescription, completionDate, priority) {
+    document.getElementById('editTaskId').value = taskId;
+    document.getElementById('edit_task_title').value = taskTitle || ''; // Если taskTitle undefined, установите пустую строку
+    document.getElementById('edit_task_description').value = taskDescription || ''; // Также устанавливаем сразу
+    document.getElementById('edit_completion_date').value = completionDate || ''; // Установите корректное значение
+    document.getElementById('edit_priority').value = priority || 'medium'; // По умолчанию установите значение
+
+    var myModal = new bootstrap.Modal(document.getElementById('editTaskModal'), {});
+    myModal.show();
+}
+
+function updateTaskInColumn(taskElement, response) {
+    // Удаляем предыдущий элемент задачи
+    taskElement.remove();
+
+    // Создаем новый элемент задачи
+    const newTaskElement = document.createElement('li');
+    newTaskElement.className = `task ${response.status}`; // Используем статус из ответа
+    newTaskElement.setAttribute('data-task-id', response.id);
+    newTaskElement.setAttribute('draggable', 'true');
+    newTaskElement.setAttribute('ondragstart', 'drag(event)');
+
+    // Добавляем обработчик события на клик
+    newTaskElement.onclick = function() {
+        showTaskDetails(response.title, response.description, response.end_time, response.priority, response.id, response.time_spent);
+    };
+
+    // Добавляем содержимое нового элемента по статусу задачи
+    newTaskElement.innerHTML = `
+        <span>${response.title} - Приоритет: ${response.priority}</span>
+    `;
+
+    // Добавляем кнопки "Запустить" и "Остановить" только для задач в статусе "In Progress"
+    if (response.status === 'inProgress') {
+        newTaskElement.innerHTML += `
+            <div>
+                <span id="timer-${response.id}">0:00</span>
+                <button class="btn btn-sm btn-success" onclick="startTimer(event, ${response.id})">Запустить</button>
+                <button class="btn btn-sm btn-danger" onclick="stopTimer(event, ${response.id})">Остановить</button>
+            </div>
+        `;
+    } else {
+        // Если это не "In Progress", просто добавляем пустой div
+        newTaskElement.innerHTML += `<div></div>`;
+    }
+
+    // Найдите колонку по статусу, который возвращает сервер
+    const taskColumn = document.getElementById(`${response.status}Tasks`);
+    if (!taskColumn) {
+        console.error(`Column not found for status: ${response.status}`);
+        return; // Если колонка не найдена, прекратите выполнение функции
+    }
+
+    taskColumn.querySelector('ul').appendChild(newTaskElement);
+    updateEmptyState(taskColumn); // Обновите состояние колонки
+}
+
+function showTaskDetails(title, description, endTime, priority, taskId, time_spent) {
+    document.getElementById('taskDetailTitle').textContent = title;
+    document.getElementById('taskDetailDescription').textContent = description || 'Нет описания.';
+    document.getElementById('taskDetailTimeSpent').textContent = time_spent;
+    document.getElementById('taskDetailEndtime').textContent = endTime || 'Не указано.';
+    document.getElementById('taskDetailPriority').textContent = priority;
+
+    document.getElementById('deleteTaskButton').onclick = function() {
+        deleteTask(taskId);
+    };
+
+    document.getElementById('editTaskButton').onclick = function() {
+        openEditTaskModal(taskId, title, description, endTime, priority);  // Убедитесь, что передаете сразу все параметры
+    };
+
+    var taskDetailsModal = new bootstrap.Modal(document.getElementById('taskDetailsModal'));
+    taskDetailsModal.show();
+}
+
+
+
+function allowDrop(ev) {
+    ev.preventDefault(); // Позволить перетаскивание
+}
+
+function drag(ev) {
+    const taskId = ev.target.dataset.taskId; // Получаем ID задачи
+    if (!taskId) {
+        console.error('data-task-id отсутствует или некорректен.');
+        return;
+    }
+    ev.dataTransfer.setData("text", taskId); // Сохраняем ID задачи
+}
+
+function drop(ev, status) {
+    ev.preventDefault();
+
+    const taskId = ev.dataTransfer.getData("text");
+    if (!taskId) {
+        console.error('ID задачи не определен');
+        return;
+    }
+
+    const taskElement = document.querySelector(`[data-task-id="${taskId}"]`);
+    if (!taskElement) {
+        console.error(`Задача не найдена в DOM для ID: ${taskId}`);
+        return;
+    }
+
+$.ajax({
+    url: '/update_task_status',
+    type: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify({
+        task_id: taskId,
+        new_status: status,
+    }),
+    success: function(response) {
+        console.log('Ответ от сервера:', response); // Для отладки
+        if (response.error) { // Проверка на наличие ошибки
+            console.error('Не удалось обновить статус задачи:', response.error);
+            alert('Ошибка при обновлении статуса задачи: ' + response.error);
+        } else {
+            updateTaskInColumn(taskElement, response);
+        }
+    },
+    error: function(error) {
+        console.error('Ошибка:', error);
+    }
+});
+}
+
+function updateEmptyState(taskColumn) {
+    const taskList = taskColumn.querySelector('ul');
+    const emptyState = taskList.querySelector('.empty-state');
+
+    if (taskList.children.length > 0) {
+        if (emptyState) {
+            emptyState.remove();
+        }
+    } else {
+        if (!emptyState) {
+            const emptyMessage = document.createElement('li');
+            emptyMessage.className = 'list-group-item empty-state';
+            emptyMessage.textContent = `Нет задач в ${taskColumn.id.split(/(?=[A-Z])/).join(" ").toLowerCase()}.`;
+            taskList.appendChild(emptyMessage);
+        }
+    }
+}
+
+function deleteTask(taskId) {
+    if (confirm('Вы уверены, что хотите удалить эту задачу?')) {
+        $.ajax({
+            url: '/delete_task',
+            type: 'POST',
+            data: { 'task_id': taskId },
+            success: function(response) {
+                window.location.reload();
+            },
+            error: function(xhr) {
+                alert('Ошибка при удалении задачи!');
+            }
+        });
+    }
+}
+
+
+let timers = {}; // Объект для хранения таймеров
+
+function timeToSeconds(time) {
+    const parts = time.split(':');
+    const minutes = parseInt(parts[0], 10);
+    const seconds = parseInt(parts[1], 10);
+    return minutes * 60 + seconds; // Преобразование в общее количество секунд
+}
+
+function startTimer(event, taskId) {
+    event.stopPropagation(); // Предотвращаем дальнейшее распространение события
+    console.log(`Запуск таймера для задачи ${taskId}`);
+
+    // Проверьте, не запущен ли таймер
+    if (timers[taskId]) {
+        console.log('Таймер уже запущен для этой задачи.');
+        return;
+    }
+
+    // Инициализация времени
+    timers[taskId] = {
+        elapsedTime: 0, // Начинаем с 0 секунд
+        interval: setInterval(() => {
+            timers[taskId].elapsedTime++; // Увеличиваем время
+            document.getElementById(`timer-${taskId}`).innerText = formatTime(timers[taskId].elapsedTime);
+        }, 1000) // Таймер обновляется каждую секунду
+    };
+}
+
+function stopTimer(event, taskId) {
+    event.stopPropagation(); // Предотвращаем дальнейшее распространение события
+    console.log(`Остановка таймера для задачи ${taskId}`);
+
+    if (timers[taskId]) {
+        clearInterval(timers[taskId].interval); // Останавливаем таймер
+        const timeSpent = formatTime(timers[taskId].elapsedTime); // Форматируем потраченное время как MM:SS
+        const timeSpentInSeconds = timers[taskId].elapsedTime; // Используйте непосредственно количество секунд
+
+        // Логируем потраченное время для отладки
+        console.log(`Потраченное время для задачи ${taskId}: ${timeSpent} (${timeSpentInSeconds} секунд)`);
+
+        // Отправка данных на сервер
+        $.ajax({
+            url: '/update_task_time',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                task_id: taskId,
+                timer_time: timeSpentInSeconds, // Изменено на timer_time
+            }),
+            success: function(response) {
+                console.log('Время обновлено в базе данных после остановки таймера');
+            },
+            error: function(error) {
+                console.error('Ошибка при обновлении времени после остановки таймера:', error);
+            }
+        });
+
+        delete timers[taskId]; // Удаляем таймер из объекта timers
+    } else {
+        console.log('Нет активного таймера для этой задачи.');
+    }
+}
+
+// Убедитесь, что функция clearTimer не дублируется
+function clearTimer(taskId) {
+    if (timers[taskId]) {
+        clearInterval(timers[taskId].interval);
+        // Не удаляйте `timers[taskId]`, чтобы сохранить информацию
+    } else {
+        console.log('Нет активного таймера для этой задачи.');
+    }
+}
+</script>
+
+</body>
+</html>

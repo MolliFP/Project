@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TouTo - ваш надежный компаньон для управления задачами и проектами. Узнайте больше о наших возможностях.">
+    <title>Описание продукта</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin: 20px 0;
+        }
+
+        .product-section {
+            background-color: #007bff;
+            color: white;
+            padding: 60px 20px; /* Увеличен padding для более объемного блока */
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s; /* Плавный переход фона */
+        }
+
+        .product-section:hover {
+            background-color: #0056b3; /* Изменение цвета при наведении */
+        }
+
+        .features {
+            display: flex;
+            justify-content: space-between;
+            margin: 40px 0;
+        }
+
+        .feature {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px; /* Увеличен padding */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 30%;
+            transition: transform 0.3s;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px); /* Поднятие блока при наведении */
+        }
+
+        .feature h3 {
+            color: #007bff;
+            margin-bottom: 15px; /* Отступ между заголовком и текстом */
+        }
+
+        .cta {
+            margin: 40px 0;
+        }
+
+        .cta a {
+            background-color: #28a745;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            font-size: 1.2rem; /* Увеличен размер шрифта */
+        }
+
+        .cta a:hover {
+            background-color: #218838;
+        }
+
+        footer {
+            margin-top: 40px;
+            color: #666;
+            font-size: 0.9rem; /* Уменьшен размер шрифта футера */
+        }
+
+        @media (max-width: 768px) {
+            .features {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .feature {
+                width: 80%;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% include 'header.html' %}
+
+    <div class="container">
+        <div class="product-section">
+            <h1>О нашем продукте</h1>
+            <p>TouTo - ваш надежный компаньон для управления задачами и проектами. Узнайте, как мы можем помочь вам организовать вашу работу и добиться больших результатов.</p>
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <h3>Удобный интерфейс</h3>
+                <p>Наш интерфейс интуитивно понятен и прост в использовании, что позволяет вам быстро начать работу.</p>
+            </div>
+            <div class="feature">
+                <h3>Сотрудничество в реальном времени</h3>
+                <p>Взаимодействуйте с вашей командой в реальном времени, следите за прогрессом и достигайте целей вместе.</p>
+            </div>
+            <div class="feature">
+                <h3>Гибкие настройки</h3>
+                <p>Настраивайте приложение под свои нужды с помощью множества функций и интеграций.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>© 2023 TouTo. Все права защищены.</p>
+    </footer>
+</body>
+</html>

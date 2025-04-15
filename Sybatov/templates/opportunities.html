@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TouTo - откройте для себя возможности нашего приложения для управления задачами и проектами.">
+    <title>Возможности</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            background-color: #eef9f0; /* Новый цвет контейнера */
+            border-radius: 10px; /* Скругленные углы */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Добавлена тень для глубины */
+        }
+
+        h1 {
+            color: #333;
+            margin: 20px 0;
+        }
+
+        .intro-section {
+            background-color: #28a745;
+            color: white;
+            padding: 50px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .opportunities {
+            display: grid; /* Используем grid для организации блоков */
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px; /* Отступы между блоками */
+            margin: 50px 0;
+        }
+
+        .opportunity {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .opportunity:hover {
+            transform: translateY(-5px);
+        }
+
+        .opportunity h3 {
+            color: #007bff; /* Цвет заголовка */
+            margin-bottom: 15px;
+        }
+
+        .cta {
+            margin: 40px 0;
+        }
+
+        .cta a {
+            background-color: #007bff;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            font-size: 1.2rem;
+        }
+
+        .cta a:hover {
+            background-color: #0056b3;
+        }
+
+        footer {
+            margin-top: 40px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    {% include 'header.html' %}
+
+    <div class="container">
+        <div class="intro-section">
+            <h1>Возможности TouTo</h1>
+            <p>Откройте для себя широкий спектр возможностей, которые наше приложение предоставляет для управления проектами и задачами.</p>
+        </div>
+
+        <div class="opportunities">
+            <div class="opportunity">
+                <h3>Интуитивно понятный интерфейс</h3>
+                <p>Управление задачами стало проще благодаря простому и удобному интерфейсу, который не требует обучения.</p>
+            </div>
+            <div class="opportunity">
+                <h3>Инструменты для совместной работы</h3>
+                <p>Работайте в команде с помощью встроенных инструментов для совместной работы и отчетности.</p>
+            </div>
+            <div class="opportunity">
+                <h3>Настраиваемые рабочие процессы</h3>
+                <p>Настройте своё приложение так, как вам удобно, добавив нужные функции и интеграции.</p>
+            </div>
+            <div class="opportunity">
+                <h3>Отслеживание времени</h3>
+                <p>Легко отслеживайте время, потраченное на каждую задачу, для более точного планирования и оценки.</p>
+            </div>
+            <div class="opportunity">
+                <h3>Аналитика и отчеты</h3>
+                <p>Получайте подробные отчеты и аналитику, которые помогут вам принимать обоснованные решения.</p>
+            </div>
+            <div class="opportunity">
+                <h3>Поддержка мобильных устройств</h3>
+                <p>Работайте в любом месте и в любое время с нашими мобильными приложениями.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>© 2023 TouTo. Все права защищены.</p>
+    </footer>
+</body>
+</html>

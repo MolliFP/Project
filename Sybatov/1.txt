@@ -1,0 +1,4 @@
+&lt;div class="form-group"&gt;
+    &lt;label for="task_description"&gt;Описание задачи&lt;/label&gt;
+    &lt;textarea name="task_description" class="form-control" id="task_description" rows="3"&gt;&lt;/textarea&gt;
+&lt;/div&gt;

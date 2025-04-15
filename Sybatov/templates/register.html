@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+
+        .registration-container {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 40px 30px;
+            width: 400px;
+            position: relative;
+        }
+
+        .project-title {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 2.5em; /* Увеличиваем размер шрифта */
+            color: #007bff;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Добавляем тень для эффекта */
+            cursor: pointer;
+            font-family: 'Pacifico', cursive;
+            text-decoration: none; /* Убираем нижнее подчеркивание */
+            transition: transform 0.3s; /* Переход для эффекта наведения */
+        }
+
+        .project-title:hover {
+            transform: scale(1.05); /* Увеличиваем размер при наведении */
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+            outline: none;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            background-color: #007bff;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .submit-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .redirect-text {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .redirect-link {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .error {
+            color: red;
+            font-size: 0.9em;
+        }
+
+        .navigation {
+            position: absolute;
+            top: 80px; /* Отступ от верхней части экрана */
+            right: 20px;
+            display: flex;
+            gap: 15px;
+        }
+    </style>
+</head>
+<body>
+    <a class="project-title" href="{{ url_for('index') }}">TouTo</a>
+
+    <div class="navigation">
+        {% if 'user_id' in session %}
+            <a href="{{ url_for('profile') }}" class="project-title" style="font-size: 1.2em;">Мой профиль</a>
+            <a href="{{ url_for('logout') }}" class="project-title" style="font-size: 1.2em;">Выйти</a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="project-title" style="font-size: 1.2em;">Вход</a>
+            <a href="{{ url_for('register') }}" class="project-title" style="font-size: 1.2em;">Регистрация</a>
+        {% endif %}
+    </div>
+
+    <div class="registration-container">
+        <h1>Создайте аккаунт</h1>
+        <form method="post">
+            <div class="input-group">
+                <input type="text" id="username" name="username" placeholder="Имя пользователя" required>
+                {% if username_error %}
+                    <p class="error">{{ username_error }}</p>
+                {% endif %}
+            </div>
+            <div class="input-group">
+                <input type="password" id="password" name="password" placeholder="Пароль" required>
+                {% if password_error %}
+                    <p class="error">{{ password_error }}</p>
+                {% endif %}
+            </div>
+            <div class="input-group">
+                <input type="password" id="confirm_password" name="confirm_password" placeholder="Подтверждение пароля" required>
+                {% if confirm_password_error %}
+                    <p class="error">{{ confirm_password_error }}</p>
+                {% endif %}
+            </div>
+            <button type="submit" class="submit-btn">Зарегистрироваться</button>
+            <p class="redirect-text">Уже есть аккаунт? <a href="{{ url_for('login') }}" class="redirect-link">Вход</a></p>
+        </form>
+    </div>
+</body>
+</html>
